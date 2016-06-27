@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>01</title>
+	</head>
+	<style>
+		body {margin: 0;}
+		#ul1 {width: 1080px; margin: 100px auto 0;}
+		li { width: 247px; list-style: none; float: left; margin-right: 10px; }
+		li div {border: 1px solid #000; padding: 10px; margin-bottom: 10px;}
+		li div img { width: 225px; display: block;}
+		#box{ width: 1080px; margin: 0 auto; text-align: center;}
+	</style>
+	<script src="ajax.js" type="text/javascript" charset="utf-8"></script>
+	<script type="text/javascript">
+		window.onload = function(){
+			var oUl = document.getElementById('ul1');
+			var aLi = oUl.getElementsByTagName('li');
+			var oBox = document.getElementById('box');
+			var ipage = 1;
+			var aKey = true;
+			
+			function getdata(){
+				ajax('get','getPics.php','cpage=' + ipage,function(data){
+					var data = JSON.parse(data);			
+					if( !data.length ){
+						return ;
+					}
+					
+					for( var i=0; i<data.length; i++ ){
+						var _index = getshort();
+						
+						var oDiv = document.createElement('div');
+						var oImg = document.createElement('img');
+						oImg.src = data[i].preview;
+						oImg.style.height = data[i].height * ( 225 / data[i].width ) + 'px';
+						oDiv.appendChild(oImg);
+						var oP = document.createElement('p');
+						oP.innerHTML = data[i].title;
+						oDiv.appendChild(oP);
+						
+						aLi[_index].appendChild(oDiv);
+					}
+					aKey = true;
+				})
+			}
+			getdata();
+			
+			window.onscroll = function(){
+				var _index = getshort();
+				var scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+				if( gettop( aLi[_index] ) + aLi[_index].offsetHeight < document.documentElement.clientHeight + scrollTop ){
+					if( aKey ){
+						aKey = false;
+						ipage++;
+						getdata();
+					}
+				}
+			}
+			
+			function gettop(obj){
+				var iTop = 0;
+				while(obj) {
+					iTop += obj.offsetTop;
+					obj = obj.offsetParent;
+				}
+				return iTop;
+			}
+			
+			function getshort(){
+				var index = 0;
+				var sli = aLi[index].offsetHeight;
+				for( var i=0; i<aLi.length; i++ ){	
+					if( aLi[i].offsetHeight < sli ){
+						index = i;
+						sli = aLi[i].offsetHeight;
+					}
+				}
+				return index;
+			}
+		}
+	</script>
+	<body>
+		<ul id="ul1">
+			<li></li>
+		  	<li></li>
+		    <li></li>
+		    <li></li>
+		</ul>
+		<div id="box"></div>
+	</body>
+</html>
