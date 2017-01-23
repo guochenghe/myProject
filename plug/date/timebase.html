@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width,maximum-scale=1.0,user-scalable=no">
+        <style type="text/css">
+        	html,body,tabel,tr,th,td{margin:0;padding:0;border:0;}
+        	body{padding:0 10px;}
+			.dataContainer{
+				width:100%;
+				max-width:640px;
+			}
+			.dataContainer table{
+				width: 100%;
+				border-collapse: collapse;/* 边框合并属性  */
+			}
+			.dataContainer table td{
+				text-align: center;
+				height: 25px;
+				width: 14%;
+				border:1px solid #ddd;
+			}
+			.dataContainer table th{
+				text-align: center;
+				height: 25px;
+				width: 25px;
+				border:1px solid #ddd;
+			}
+			.dataContainer table .default{
+				cursor: pointer;
+			}
+			.dataContainer table .data_title td{
+				padding:10px 0;
+			}
+			.data_time{
+				width: 300px;
+				height: 20px;
+				line-height: 30px;
+				color: #333;
+			}
+        </style>
+    </head>
+    <body>
+	<input type="text" class="data_time">
+	<!-- 日历插件初试 -->
+	<script type="text/javascript">
+		//获取class类名
+		function getClass(oParent,sClass){
+			var eLe = oParent.getElementsByTagName('*');
+			var aResult = [];
+			for(var i=0;i<eLe.length;i++){
+				if(eLe[i].className == sClass){
+					aResult.push(eLe[i]);
+				}
+			}
+			return aResult;
+		}
+		function hQuery(hArg){
+			this.elements = [];
+			//选择器
+			switch (typeof hArg){
+				case 'string':
+					//hArg.charAt(0) 表示字符串的第一个位置的字符
+					switch(hArg.charAt(0)){
+						case '.':
+							this.elements = getClass(document,hArg.substring(1));
+							break;
+						case '#':
+							this.elements.push(document.getElementById(hArg.substring(1)));
+							break;
+					}
+					break;
+			}
+		}
+		function $(hArg){
+			return new hQuery(hArg);
+		}
+
+		window.onload = function(){
+			console.log($('.default'));
+		}
+
+		/*首先要判断是不是闰年*/
+		function isLeap (year) {
+			return year%400 == 0 ? (year%100 != 0 ? 1: (year%400 == 0 ? 1:0)):0;  
+		}
+
+		function dataPage (){
+
+			/*var today = new Date(),
+				//获取年份用来判断是否是闰年
+				y = today.getFullYear(),
+				m = today.getMonth(),
+				d = today.getDate(),
+				//获取当前月份的第一天
+				firstday = new Date(y, m, 1),
+				w_d = firstday.getDay(),
+				//创建日历结构html
+				data_html = '',
+				//建立月份数组
+				monthArr = [31, 28 + isLeap(y), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31],
+				//确定所需当前月份日历所需行数
+				rows_num = Math.ceil((w_d+monthArr[m])/7);*/
+
+				var today = new Date(),
+					//获取年份用来判断是否是闰年
+					y = [],
+					m = [],
+					d = [],
+					//获取当前月份的第一天
+					firstday = [],
+					w_d = [],
+					//创建日历结构html
+					data_html = '',
+					//建立月份数组
+					monthArr = [],
+					//确定所需当前月份日历所需行数
+					rows_num = [];
+					d.push(today.getDate());
+					data_html = '<table id="abc" cellspacing="0"><tr><th>日</th><th>一</th><th>二</th><th>三</th><th>四</th><th>五</th><th>六</th></tr>'; 	//打印表格第一行(显示星期)
+				for(var a=0;a<6;a++){
+					
+					y.push(today.getFullYear());
+					m.push(today.getMonth());
+					firstday.push(new Date(y[a], m[a], 1));
+					w_d.push(firstday[a].getDay());
+					monthArr.push([31, 28 + isLeap(y[a]), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]);
+
+					rows_num.push(Math.ceil((w_d[a]+monthArr[a][m[a]])/7));
+					data_html+= '<tr class="data_title"><td colspan="7" style="text-align:center;">'+y[a]+'年'+(m[a]+1)+'月</td></tr>';	
+					today = new Date(today.setMonth(today.getMonth()+1));
+
+					//console.log(new Date(today.getFullYear()+'-'+(parseInt(today.getMonth())+1+a+1)+'-'+today.getDate()));
+					
+					//利用行，列二维数组循环
+					for(var i=0;i<rows_num[a];i++){
+
+						data_html+='<tr>';
+
+						for(var k=0;k<7;k++){
+
+							//为每行每个元素添加索引值
+							_index = 7*i + k;
+
+							dataTime = _index - w_d[a] +1;
+
+							//如果当前数值小于等于0 或者大于该月份日期最大值 都用空格代替
+							data = (dataTime<=0 || dataTime>monthArr[a][m[a]]) ? ' ' : dataTime;
+							
+							if(a == 0){
+								if(data < d[0]){
+									data_html+= '<td>'+data+'</td>';
+								}else if(data == d[0]){
+									data_html+='<td class="today default" style="color:#f40;" data_day="'+y[a]+'-'+(m[a]+1)+'-'+data+'">'+data+'</td>';
+								}else{
+									data_html+='<td class="default" data_day="'+y[a]+'-'+(m[a]+1)+'-'+data+'">'+data+'</td>';
+								}
+								//data_html += data == d[0] ? '<td class="today" style="color:#f40;">'+data+'</td>' : '<td>'+data+'</td>';	
+							}else{
+								data_html +='<td class="default"'; //
+								data_html+= data==' ' ? '': 'data_day="'+y[a]+'-'+(m[a]+1)+'-'+data+'"';
+								data_html+='>'+data+'</td>';
+							}
+							//首先找到第一天所在位置
+						}
+
+						data_html+='</tr>';
+
+					}
+				}
+				data_html+='</table>';
+
+				var dataContainer = document.createElement('div');
+				dataContainer.className = 'dataContainer';
+
+				dataContainer.innerHTML = data_html;
+
+				document.body.appendChild(dataContainer);
+		}
+
+		dataPage();
+
+
+
+
+	</script>
+
+
+
+
+
+
+
+
+
+
+
+    </body>
+</html>

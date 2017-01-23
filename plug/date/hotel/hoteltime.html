@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>hotel-time</title>
+	<script src="http://yui.yahooapis.com/3.5.1/build/yui/yui-min.js"></script>
+	<script type="text/javascript">
+		var config = {
+		    modules: {
+		        'price-calendar': {
+		            fullpath: 'price-calendar.js', //根据项目路径调整
+		            type    : 'js',
+		            requires: ['price-calendar-css']
+		        },
+		        'price-calendar-css': {
+		            fullpath: 'price-calendar.css', //根据项目路径调整
+		            type    : 'css'
+		        }
+		    }
+		};
+
+		YUI(config).use('price-calendar', function(Y) {
+		    var oCalendar = new Y.PriceCalendar();    
+		    //do something
+		})
+	</script>
+</head>
+<body>
+	
+</body>
+</html>

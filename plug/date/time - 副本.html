@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width,maximum-scale=1.0,user-scalable=no">
+        <style type="text/css">
+        	html,body,tabel,tr,th,td{margin:0;padding:0;border:0;}
+        	body{padding:0 10px;}
+			.dataContainer{
+				width:100%;
+				max-width:640px;
+			}
+			.dataContainer table{
+				width: 100%;
+				border-collapse: collapse;/* 边框合并属性  */
+			}
+			.dataContainer table td{
+				text-align: center;
+				height: 25px;
+				width: 14%;
+				border:1px solid #ddd;
+			}
+			.dataContainer table th{
+				text-align: center;
+				height: 25px;
+				width: 25px;
+				border:1px solid #ddd;
+			}
+			.dataContainer table .default{
+				cursor: pointer;
+			}
+			.dataContainer table .data_title td{
+				padding:10px 0;
+			}
+			.dataContainer table  .start_day{
+				background: red;
+			}
+			.dataContainer table  .end_day{
+				background: green;
+			}
+
+			.dataContainer table  .transition{
+				background: #a18ee6;
+			}
+			.data_time{
+				width: 300px;
+				height: 20px;
+				line-height: 30px;
+				color: #333;
+			}
+        </style>
+    </head>
+    <body>
+	<input type="text" class="data_time">
+
+	<!-- 日历插件初试 -->
+	<script type="text/javascript" src="jquery-1.11.1.js"></script>
+	<script type="text/javascript">
+
+		var _hDataSel = {
+			getClass:function(oParent,sClass){
+				var eLe = oParent.getElementsByTagName('*');
+				var aResult = [];
+				for(var i=0;i<eLe.length;i++){
+					if(eLe[i].className == sClass){
+						aResult.push(eLe[i]);
+					}
+				}
+				return aResult;
+			},
+			hQuery:function(hArg){
+				_hDataSel.elements = [];
+				var _this = _hDataSel;
+				/*选择器*/
+				switch (typeof hArg){
+					case 'string':
+						//hArg.charAt(0) 表示字符串的第一个位置的字符
+						switch(hArg.charAt(0)){
+							case '.':
+								_hDataSel.elements = _this.getClass(document,hArg.substring(1));
+								break;
+							case '#':
+								_hDataSel.elements.push(document.getElementById(hArg.substring(1)));
+								break;
+						}
+						break;
+				}
+
+				return _hDataSel;
+			},
+			click:function(fn){
+
+				for(var i=0;i<_hDataSel.elements.length;i++){
+					_hDataSel.elements[i].onclick = function(){
+						fn.call(this);
+					}
+				}
+
+			},
+			$:function(hArg){
+				return new _hDataSel.hQuery(hArg);
+			}
+		}
+
+
+		var dataBag = {
+			isLeap:function(year){
+				return year%400 == 0 ? (year%100 != 0 ? 1: (year%400 == 0 ? 1:0)):0;
+			},
+			dataPage:function(){
+				var today = new Date(),
+					//获取年份用来判断是否是闰年
+					y = [],
+					m = [],
+					d = [],
+					//获取当前月份的第一天
+					firstday = [],
+					w_d = [],
+					//创建日历结构html
+					data_html = '',
+					//建立月份数组
+					monthArr = [],
+					//确定所需当前月份日历所需行数
+					rows_num = [];
+					d.push(today.getDate());
+					data_html = '<table id="abc" cellspacing="0"><tr><th>日</th><th>一</th><th>二</th><th>三</th><th>四</th><th>五</th><th>六</th></tr>'; 	//打印表格第一行(显示星期)
+				for(var a=0;a<6;a++){
+					
+					y.push(today.getFullYear());
+					m.push(today.getMonth());
+					firstday.push(new Date(y[a], m[a], 1));
+					w_d.push(firstday[a].getDay());
+					monthArr.push([31, 28 + this.isLeap(y[a]), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]);
+
+					rows_num.push(Math.ceil((w_d[a]+monthArr[a][m[a]])/7));
+					data_html+= '<tr class="data_title"><td colspan="7" style="text-align:center;">'+y[a]+'年'+(m[a]+1)+'月</td></tr>';	
+					today = new Date(today.setMonth(today.getMonth()+1));
+
+					//console.log(new Date(today.getFullYear()+'-'+(parseInt(today.getMonth())+1+a+1)+'-'+today.getDate()));
+					
+					//利用行，列二维数组循环
+					for(var i=0;i<rows_num[a];i++){
+
+						data_html+='<tr>';
+
+						for(var k=0;k<7;k++){
+
+							//为每行每个元素添加索引值
+							_index = 7*i + k;
+
+							dataTime = _index - w_d[a] +1;
+
+							//如果当前数值小于等于0 或者大于该月份日期最大值 都用空格代替
+							data = (dataTime<=0 || dataTime>monthArr[a][m[a]]) ? ' ' : dataTime;
+							
+							if(a == 0){
+								if(data < d[0]){
+									data_html+= '<td>'+data+'</td>';
+								}else if(data == d[0]){
+									data_html+='<td class="today default" style="color:#f40;" data_day="'+y[a]+'-'+(m[a]+1)+'-'+data+'">'+data+'</td>';
+								}else{
+									data_html+='<td class="default" data_day="'+y[a]+'-'+(m[a]+1)+'-'+data+'">'+data+'</td>';
+								}
+								//data_html += data == d[0] ? '<td class="today" style="color:#f40;">'+data+'</td>' : '<td>'+data+'</td>';	
+							}else{
+								data_html +='<td'; //
+								data_html+= data==' ' ? '': ' class="default" data_day="'+y[a]+'-'+(m[a]+1)+'-'+data+'"';
+								data_html+='>'+data+'</td>';
+							}
+							//首先找到第一天所在位置
+						}
+
+						data_html+='</tr>';
+
+					}
+
+				}
+				data_html+='</table>';
+
+				var dataContainer = document.createElement('div');
+				dataContainer.className = 'dataContainer';
+
+				dataContainer.innerHTML = data_html;
+
+				document.body.appendChild(dataContainer);
+
+
+				//为日期标签绑定是事件
+				this.bind();
+			},
+			bind:function(){
+
+				var self = this;
+				self.start_day = null;
+				self.end_day = null;
+				self.start_index = null;
+				self.end_index = null;
+
+				//$('.default') 选择的是当天或者当天之后的日期
+				$('.default').click(function(){
+
+					if(!$('.start_day').length){
+
+						$(this).addClass('start_day');
+						//找到所有可选日期起始的索引值
+						for(var a=0;a<$('.default').length;a++){
+							if($('.default')[a] == $(this)[0]){
+								self.start_index = a;
+							}
+						}
+						self.start_day = $(this).attr('data_day');
+
+					}else{
+						//点击选择结束时间
+						var mustBeStart = new Date($('.start_day').attr('data_day')).getTime();
+						var mayBeEnd = new Date($(this).attr('data_day')).getTime();
+						if(!$('.end_day').length && (mayBeEnd > mustBeStart)){
+							$(this).addClass('end_day');
+							self.end_day = $(this).attr('data_day');
+
+							//计算start_day and end_day 相差的天数
+							var time_diff = new Date(self.end_day).getTime()-new Date(self.start_day).getTime();
+							var day_len = Math.ceil(time_diff/(24*3600*1000));
+							console.log(day_len);
+
+							//找到所有可选日期结束的索引值
+							for(var b=0;b<$('.default').length;b++){
+								if($('.default')[b] == $(this)[0]){
+									self.end_index = b;
+								}
+							}
+							//循环两天中间的天数
+							for(var c=1;c<day_len;c++){
+								$('.default').eq(self.start_index+c).addClass('transition');	
+							}
+
+
+						}else{
+							$('.start_day').removeClass('start_day');
+							$('.end_day').removeClass('end_day');
+							$('.transition').removeClass('transition');
+							self.start_day = null;
+							self.end_day = null;
+							self.start_index = null;
+							self.end_index = null;
+						}
+					}
+					//如果存在结束日期
+					/*if($('.start_day').length){
+						$(this).addClass('end_day');
+						self.end_day = $(this).attr('data_day');
+
+						//计算start_day and end_day 相差的天数
+						var time_diff = new Date(self.end_day).getTime()-new Date(self.start_day).getTime();
+						var day_len = Math.floor(time_diff/(24*3600*1000));
+
+						//找到所有可选日期结束的索引值
+						for(var b=0;b<$('.default').length;b++){
+							if($('.default')[b] == $(this)[0]){
+								self.end_index = b;
+							}
+						}
+
+						//循环两天中间的天数
+						for(var c=1;c<day_len;c++){
+							$('.default').eq(self.start_index+c).addClass('transition');	
+						}
+					}else{
+						//找到所有可选日期起始的索引值
+						for(var a=0;a<$('.default').length;a++){
+							if($('.default')[a] == $(this)[0]){
+								self.start_index = a;
+							}
+						}
+						$(this).addClass('start_day');
+						self.start_day = $(this).attr('data_day');
+					}*/
+
+				})
+			}
+		}
+
+		dataBag.dataPage();
+
+
+
+
+	</script>
+
+
+
+
+
+
+
+
+
+
+
+    </body>
+</html>

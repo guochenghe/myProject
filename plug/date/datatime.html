@@ -1,0 +1,331 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>日历组件示例</title>
+    <style>
+        .calendar{font-family:Tahoma; background:#fff; float:left; border-style:solid; border-width:1px; border-color:#85BEE5 #3485C0 #3485C0 #85BEE5; position:relative; padding:10px; }
+        .calendar dl,.calendar dd{margin:0; padding:0; width:720px; font-size:12px; line-height:22px;}
+        .calendar dt.title-date{ display:block; border-bottom:1px solid #E4E4E4; font-weight:700; position:relative; margin-bottom:5px; padding-bottom:3px;}
+        .calendar dt{ float:left; width:100px; margin-left:1px; text-align:center;}
+        .calendar dt.title-date{ width:100%;}
+        .calendar dd{clear: both;width: 707px;height: 505px; border: 1px solid #999; border-right: 0; border-bottom: 0; font-weight: 700; margin:0;}
+        .prevyear,.nextyear, .prevmonth,.nextmonth{cursor:pointer;height:9px; background:url(http://images.cnblogs.com/cnblogs_com/NNUF/379856/o_nextprv.png) no-repeat; overflow:hidden;position:absolute; top:8px; text-indent:-999px;}
+        .prevyear{  left:4px;  width:9px;}
+        .prevmonth{ width:5px; background-position:-9px 0; left:20px;}
+        .nextyear{  width:9px; background-position:-19px 0; right:5px;}
+        .nextmonth{ width:5px; background-position:-14px 0; right:20px;}
+        .calendar dd a{float: left; height: 100px; width: 100px; color:blue; overflow: hidden; text-decoration: none;
+            margin: 1px 0 0 1px; font-size:16px;border-right:1px solid #999;border-bottom:1px solid #999; margin:0; text-align: left; position: relative;}
+        .calendar dd a input{position: absolute; top:5px; right: 5px; display: none;}
+        .calendar dd a.disabled{color:#999;}
+        .calendar dd a.tody{ color:red; }
+        .calendar dd a.on{background:blue; color:#fff;}
+        .calendar dd a.live{cursor:pointer}
+        .input{ border:1px solid #ccc; padding:4px; no-repeat right -18px;height:0;width: 0;border:0;}
+        .calendar dd a span{display: block;}
+
+        .infoContainer{background:#fff;right: 0; top: 0; width: 300px;text-align: center;}
+        .infoContainer em{font-style: normal;width: 80px; text-align: right; display: inline-block; vertical-align: middle;}
+        .infoContainer input{display: inline-block; vertical-align: middle;}
+        .infoContainer button{width: 60px; height: 30px; line-height: 30px; margin:0 10px; text-align: center; border:0; cursor: pointer;}
+        .batchSet{cursor: pointer; width: 90px;height: 30px;line-height: 30px;text-align: center;display: inline-block;background: #ddd;}
+
+    </style>
+</head>
+<body>
+
+<div><input type="text" id="j_Date1" class="input"><span class="batchSet" batchstatus="false">批量设置</span></div>
+
+<script>
+/**
+ * @namespace _CalF
+ * 日历控件所用便捷函数
+ * */
+_CalF = {
+    // 选择元素
+    $:function(arg,context){
+        var tagAll,n,eles=[],i,sub = arg.substring(1);
+        context = context||document;
+        if(typeof arg =='string'){
+            switch(arg.charAt(0)){
+                case '#':
+                    return document.getElementById(sub);
+                    break;
+                case '.':
+                    if(context.getElementsByClassName) return context.getElementsByClassName(sub);
+                    tagAll = _CalF.$('*',context);
+                    n = tagAll.length;
+                    for(i = 0;i<n;i++){
+                        if(tagAll[i].className.indexOf(sub) > -1) eles.push(tagAll[i]);
+                    }
+                    return eles;
+                    break;
+                default:
+                    return context.getElementsByTagName(arg);
+                    break;
+            }
+        }
+    },
+    // 绑定事件
+    bind:function(node,type,handler){
+        node.addEventListener?node.addEventListener(type, handler, false):node.attachEvent('on'+ type, handler);
+    },
+    // 获取元素位置
+    getPos:function (node) {
+        var scrollx = document.documentElement.scrollLeft || document.body.scrollLeft,
+                scrollt = document.documentElement.scrollTop || document.body.scrollTop;
+        pos = node.getBoundingClientRect();
+        console.log(pos.top + scrollt+10)
+        return {top:pos.top + scrollt, right:pos.right + scrollx, bottom:pos.bottom + scrollt, left:pos.left + scrollx }
+    },
+    // 添加样式名
+    addClass:function(c,node){
+        node.className = node.className + ' ' + c;
+    },
+    // 移除样式名
+    removeClass:function(c,node){
+        var reg = new RegExp("(^|\\s+)" + c + "(\\s+|$)","g");
+        node.className = node.className.replace(reg, '');
+    },
+    // 阻止冒泡
+    stopPropagation:function(event){
+        event = event || window.event;
+        event.stopPropagation ? event.stopPropagation() : event.cancelBubble = true;
+    }
+};
+/**
+ * @name Calender
+ * @constructor
+ * @created by VVG
+ * @http://www.cnblogs.com/NNUF/
+ * @mysheller@163.com
+ * */
+function Calender() {
+    this.initialize.apply(this, arguments);
+}
+Calender.prototype = {
+    constructor:Calender,
+    // 模板数组
+    _template :[
+        '<dl>',
+        '<dt class="title-date">',
+        '<span class="prevmonth">prevmonth</span>',
+        '<span class="nextmonth">nextmonth</span>',
+        '</dt>',
+        '<dt><strong>日</strong></dt>',
+        '<dt>一</dt>',
+        '<dt>二</dt>',
+        '<dt>三</dt>',
+        '<dt>四</dt>',
+        '<dt>五</dt>',
+        '<dt><strong>六</strong></dt>',
+        '<dd></dd>',
+        '</dl>'],
+    // 初始化对象
+    initialize :function (options) {
+        this.id = options.id; // input的ID
+        this.createContainer();
+        for(var a=0;a<6;a++){
+        	var year = new Date().getFullYear(),
+	    	month = new Date().getMonth()+a,
+	    	date = new Date().getDate();
+	        this.drawDate(new Date(year, month, date));
+        }
+
+        this.calendBox = document.getElementsByClassName('calendar');
+        for(var i=0;i<this.calendBox.length;i++){
+        	this.calendBox[i].style.display =  'none';
+        }
+        this.calendBox[0].style.display = 'block';
+
+        //设置初始当前月份索引值
+        this.monthIndex = 0;
+    },
+    // 创建日期最外层盒子，并设置盒子的绝对定位
+    createContainer:function(){
+        // 如果存在，则移除整个日期层Container
+        var odiv = _CalF.$('#'+ this.id + '-date');
+        if(!!odiv) odiv.parentNode.removeChild(odiv);
+        var container = this.container = document.createElement('div');
+        var infoContainer = this.infoContainer = document.createElement('div');
+        infoContainer.className = 'infoContainer';
+        infoContainer.style.position = "absolute";
+        infoContainer.style.zIndex = 1000;
+        infoContainer.innerHTML = '<h2>价格库存设置</h2><p><em>门市价</em> <input type="text" class="doorVal" /></p><p><em>成人价</em> <input type="text" class="adultVal" /></p><p><em>库存</em> <input type="text" /></p><p><em>第3-4人价</em> <input type="text" /></p><p><button>设置</button><button>重置</button></p>';
+
+
+        container.id = this.id + '-date';
+        container.style.position = "absolute";
+        container.style.zIndex = 999;
+        // 获取input表单位置inputPos
+        var input = _CalF.$('#' + this.id),
+            inputPos = _CalF.getPos(input);
+        // 根据input的位置设置container高度
+        console.log(inputPos.bottom);
+        container.style.left = inputPos.left + 'px';
+        container.style.top = inputPos.bottom +20 + 'px';
+
+        infoContainer.style.left = inputPos.left+750 + 'px';
+        infoContainer.style.top = inputPos.bottom +20 + 'px';
+        // 设置日期层上的单击事件，仅供阻止冒泡，用途在日期层外单击关闭日期层
+        _CalF.bind(container, 'click', _CalF.stopPropagation);
+
+        document.body.appendChild(infoContainer);
+        document.body.appendChild(container);
+    },
+    // 渲染日期
+    drawDate:function (odate) { // 参数 odate 为日期对象格式
+        var dateWarp, titleDate, dd, year, month, date, days, weekStart,i,l,ddHtml=[],textNode;
+        var nowDate = new Date(),nowyear = nowDate.getFullYear(),nowmonth = nowDate.getMonth(),
+                nowdate = nowDate.getDate();
+        this.dateWarp = dateWarp = document.createElement('div');
+        dateWarp.className = 'calendar';
+        dateWarp.innerHTML = this._template.join('');
+        this.year = year = odate.getFullYear();
+        this.month = month = odate.getMonth()+1;
+        this.date = date = odate.getDate();
+        this.titleDate = titleDate = _CalF.$('.title-date', dateWarp)[0];
+        // 是否显示SELECT
+        textNode = document.createTextNode(year + '年' + month + '月');
+        titleDate.appendChild(textNode);
+        this.btnEvent();
+        // 获取模板中唯一的DD元素
+        this.dd = dd = _CalF.$('dd',dateWarp)[0];
+        // 获取本月天数
+        days = new Date(year, month, 0).getDate();
+        // 获取本月第一天是星期几
+        weekStart = new Date(year, month-1,1).getDay();
+        // 开头显示空白段
+        for (i = 0; i < weekStart; i++) {
+            ddHtml.push('<a>&nbsp;</a>');
+        }
+        // 循环显示日期
+        for (i = 1; i <= days; i++) {
+            if (year < nowyear) {
+                ddHtml.push('<a class="live disabled">' + i + '</a>');
+            } else if (year == nowyear) {
+                if (month < nowmonth + 1) {
+                    ddHtml.push('<a class="live disabled">' + i + '</a>');
+                } else if (month == nowmonth + 1) {
+                    if (i < nowdate) ddHtml.push('<a class="live disabled">' + i + ' </a>');
+                    if (i == nowdate) ddHtml.push('<a class="live canEdit tody">' + i + '<span class="doorPrice">￥9559</span><span class="adultPrice">￥5555</span class="stock"><span>0/5</span> <input type="checkbox" class="setToday" /></a>');
+                    if (i > nowdate) ddHtml.push('<a class="live canEdit">' + i + '<span class="doorPrice">￥9559</span><span class="adultPrice">￥5555</span class="stock"><span>0/5</span> <input type="checkbox" class="setToday" /></a>');
+                } else if (month > nowmonth + 1) {
+                    ddHtml.push('<a class="live canEdit">' + i + '<span class="doorPrice">￥9559</span><span class="adultPrice">￥5555</span class="stock"><span>0/5</span> <input type="checkbox" class="setToday" /></a>');
+                }
+            }else if (year > nowyear){
+                ddHtml.push('<a class="live canEdit">' + i + '<span class="doorPrice">￥9559</span><span class="adultPrice">￥5555</span class="stock"><span>0/5</span><input type="checkbox" class="setToday" /></a>');
+            }
+        }
+        dd.innerHTML = ddHtml.join('');
+
+        // 添加
+        this.container.appendChild(dateWarp);
+
+        // A link事件绑定
+        this.linkOn();
+    },
+    // 上一月，下一月按钮事件
+    btnEvent:function(){
+        var that = this,
+            prevmonth = _CalF.$('.prevmonth',that.dateWarp)[0],
+            nextmonth = _CalF.$('.nextmonth',that.dateWarp)[0];
+        prevmonth.onclick = function(){
+            that.monthIndex--;
+            if(that.monthIndex <=0){
+            	that.monthIndex = 0;
+            }
+            for(var i=0;i<that.calendBox.length;i++){
+	        	that.calendBox[i].style.display =  'none';
+	        }
+            that.calendBox[that.monthIndex].style.display = 'block';
+        };
+
+        nextmonth.onclick = function(){
+            that.monthIndex++;
+
+            if(that.monthIndex >=5){
+            	that.monthIndex = 5;
+            }
+            for(var i=0;i<that.calendBox.length;i++){
+	        	that.calendBox[i].style.display =  'none';
+	        }
+            that.calendBox[that.monthIndex].style.display = 'block';
+        }
+    },
+    // A 的事件
+    linkOn:function(){
+
+        /*点击批量设置*/
+        var batchStatus = document.getElementsByClassName('batchSet')[0].getAttribute('batchstatus');
+        var canEdit = document.getElementsByClassName('canEdit');
+        document.getElementsByClassName('batchSet')[0].onclick = function(){
+
+
+            batchStatus = this.getAttribute('batchstatus');
+            if(batchStatus == 'false'){
+                this.innerHTML = '取消批量';
+                this.setAttribute('batchstatus','true');
+            }else{
+                this.innerHTML = '批量设置';
+                this.setAttribute('batchstatus','false');
+                for(var c=0;c<canEdit.length;c++){
+                    canEdit[c].getElementsByClassName('setToday')[0].style.display = 'none';
+                    canEdit[c].getElementsByClassName('setToday')[0].setAttribute('checked', 'false');
+                } 
+            }
+            
+        }
+    	//只有将来的时间对象可以点击
+        var links = _CalF.$('.canEdit',this.dd),i,l=links.length,that=this;
+        var canEdit = document.getElementsByClassName('canEdit');
+        for(i = 0;i<l;i++){
+            links[i].index = i;
+            links[i].onclick = function(){
+            	
+                //批量选择设置
+                var setDay = this.getElementsByClassName('setToday')[0];
+    
+                if(setDay.getAttribute('checked') == 'true'){
+
+                    setDay.style.display = 'none';
+                    setDay.setAttribute('checked', 'false');
+                }else{
+                    //如果没有勾选批量设置，每次选择一个之前把所有的其他的先隐藏
+                    var batchStatus = document.getElementsByClassName('batchSet')[0].getAttribute('batchstatus');
+
+                    if(batchStatus == 'false'){
+                        var doorPrice = this.getElementsByClassName('doorPrice')[0].innerHTML;
+                        var adultPrice = this.getElementsByClassName('adultPrice')[0].innerHTML;
+                        var infoCon = document.getElementsByClassName('infoContainer')[0];
+
+                        infoCon.getElementsByClassName('doorVal')[0].value = doorPrice;
+                        infoCon.getElementsByClassName('adultVal')[0].value = adultPrice;
+                        for(var b=0;b<canEdit.length;b++){
+                            canEdit[b].getElementsByClassName('setToday')[0].style.display = 'none';
+                            canEdit[b].getElementsByClassName('setToday')[0].setAttribute('checked', 'false');
+                        } 
+                    }
+                    
+                    setDay.style.display = 'block';
+                    setDay.setAttribute('checked', 'true');
+                }
+
+            }
+        }
+    }
+};
+var myDate1 = new Calender({id:'j_Date1'});
+</script>
+
+
+<script>
+    (function(a,h,c,b,f,g){a["UdeskApiObject"]=f;a[f]=a[f]||function(){(a[f].d=a[f].d||[]).push(arguments)};g=h.createElement(c);g.async=1;g.src=b;c=h.getElementsByTagName(c)[0];c.parentNode.insertBefore(g,c)})(window,document,"script","//imptrip.udesk.cn/im_client/js/udeskApi.js?1480642833524","ud");
+    ud({
+        "code": "ig1g1f1",
+        "link": "//imptrip.udesk.cn/im_client?web_plugin_id=14174"
+    });
+    </script>
+</body>
+</html>
