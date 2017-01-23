@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>简易祖玛小游戏</title>
+	<style>
+		*{
+			margin: 0;
+			padding: 0;
+			border: 0;
+		}
+		body{
+			background: #000;
+		}
+		.canvas{
+			width: 1200px;
+			margin: 0 auto;
+		}
+		#c1{
+			background: #fff;
+		}
+	</style>
+	<script>
+		window.onload = function(){
+
+			var c1 = document.getElementById('c1');
+			var oG = c1.getContext('2d');
+
+
+			var oImg = new Image();
+			var num = 0; //旋转角度
+			var rotateB = 0;
+			oImg.src="zuma.png";
+			//设置小球初始属性
+			var ball = [];
+
+			var bollTotal = 1;
+			ball.push({
+				x:600 ,
+				y:0 ,
+				startX:600 ,
+				startY:0 ,
+				B:0 ,
+				r:200 //半径为大圆的半径
+			})
+			oImg.onload = function(){
+
+				setInterval(function(){
+					//每次重绘画布之前要先清空画布
+					oG.clearRect(0,0,c1.width,c1.height)
+
+					//大路径
+					oG.beginPath();
+					oG.arc(600,200,200,-180*Math.PI/180,-90*Math.PI/180,true);
+					oG.stroke();
+					oG.closePath();
+
+					//小路径
+					oG.beginPath();
+					oG.arc(550,200,150,-180*Math.PI/180,0,false);
+					oG.stroke();
+					oG.closePath();
+
+					oG.beginPath();
+					oG.arc(700,200,10,360*Math.PI/180,0,false);
+					oG.fill();
+					oG.closePath();
+
+
+					//祖玛头
+					oG.save();
+
+					oG.translate(600,200);
+					oG.rotate(rotateB);
+					oG.translate(-20,-20);
+					oG.drawImage(oImg,0,0,40,40);
+
+					oG.restore();
+
+					//每次重绘画布之后要重绘画布上之前有的所有小球和祖玛子弹
+					for(var i=0;i<ball.length;i++){
+						oG.beginPath();
+						oG.moveTo(ball[i].x,ball[i].y);
+						oG.arc(ball[i].x,ball[i].y,10,0,360*Math.PI/180,false);
+						oG.fill();
+						oG.closePath();
+					}
+
+					for(var i=0;i<bullte.length;i++){
+						oG.save();
+						oG.fillStyle = '#f40';
+						oG.beginPath();
+						oG.moveTo(bullte[i].x,bullte[i].y);
+						oG.arc(bullte[i].x,bullte[i].y,10,0,360*Math.PI/180,false);
+						oG.fill();
+						oG.closePath();
+						oG.restore();
+					}
+
+					//碰撞检测
+					for(var a=0;a<ball.length;a++){
+						for(var b=0;b<bullte.length;b++){
+							if(boomTest(ball[a].x,ball[a].y,bullte[b].x,bullte[b].y)){
+								ball.splice(a,1);
+								ball.splice(b,1);
+								break;
+							}
+						}
+					}
+
+				}, 1000/60)
+
+				//重启一个定时器，控制小球的运动周期
+				setInterval(function(){
+					for(var i=0;i<ball.length;i++){
+						var item = ball[i];
+						item.B+=0.5;
+						if(item.B == 270){
+							item.r = 150;
+							item.startX = 550;
+							item.startY = 50;
+						}
+						if(item.B == 450){
+							alert('游戏结束！');
+							window.location.reload();
+						}
+						item.x = item.startX + item.r*Math.sin(item.B*Math.PI/180);
+						item.y = item.startY + item.r - item.r*Math.cos(item.B*Math.PI/180);
+					}
+
+					for(var i=0;i<bullte.length;i++){
+						bullte[i].x = bullte[i].sX + bullte[i].x;
+						bullte[i].y = bullte[i].sY + bullte[i].y;
+					}
+
+					if(!ball.length){
+						alert('哎呦不错哦~');
+						window.location.reload();
+					}
+
+				},30)
+
+
+				//循环出现小球
+				setInterval(function(){
+					bollTotal++;
+					if(bollTotal<=20){
+						ball.push({
+							x:600 ,
+							y:0 ,
+							startX:600 ,
+							startY:0 ,
+							B:0 ,
+							r:200 //半径为大圆的半径
+						})
+					}
+					
+					
+				}, 1000)
+
+
+				c1.onmousemove = function(ev){
+					var ev = ev || window.event;
+
+					var cX = ev.clientX-600-c1.offsetLeft;
+					var cY = ev.clientY-200-c1.offsetTop;
+					var cZ = Math.sqrt(cX*cX+cY*cY);
+					if(cX>0 && cY<0){
+						rotateB = Math.asin(cX/cZ);
+					}else if(cX>0 && cY>0){
+						rotateB = Math.asin(cY/cZ) + 90*Math.PI/180;
+					}else if(cX<0 && cY>0){
+						rotateB = Math.asin(-cX/cZ) + 180*Math.PI/180;
+					}else if(cX <0 && cY< 0){
+						rotateB = Math.asin(-cY/cZ) + 270*Math.PI/180;
+					}
+
+				}
+
+				var bullte = [];
+				//点击发射子弹
+				c1.onmousedown = function(ev){
+					var ev = ev || window.event;
+
+					var cX = ev.clientX-600-c1.offsetLeft;
+					var cY = ev.clientY-200-c1.offsetTop;
+					var cZ = Math.sqrt(cX*cX+cY*cY);
+
+					var speed = 5;
+					//小球x，y轴的速度
+					var sX = speed*cX/cZ;
+					var sY = speed*cY/cZ;
+					bullte.push({
+						x:600,
+						y:200,
+						sX:sX,
+						sY:sY
+					})
+
+				}
+
+				//球球之间碰撞检测,只要判断两个圆心之间的距离
+				function boomTest (x1,y1,x2,y2){
+					var a = x1-x2;
+					var b = y1-y2;
+					var c = Math.sqrt(a*a + b*b);
+					if(c<=20){
+						return true;
+					}else{
+						return false;
+					}
+				}
+
+			}
+
+		}
+	</script>
+</head>
+<body>
+	<div class="canvas">
+		<canvas id="c1" width="1200" height="600"></canvas>
+	</div>
+</body>
+</html>
