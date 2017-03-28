@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width,maximum-scale=1.0,user-scalable=no">
+        <style type="text/css">
+            body{
+                background: #000;
+            }
+            #c1{
+                background: #fff;
+            }
+        </style>
+
+        <script>
+            window.onload = function(){
+
+                var c1 = document.getElementById('c1'); //画布
+
+                oG = c1.getContext('2d');   //绘图环境
+                
+                function drowTime(){
+                    oG.lineWidth = 1;
+                    oG.beginPath();
+                    /*画个钟表*/                
+                    for(var i=0;i<60;i++){
+                        oG.moveTo(200,200);
+                        oG.arc(200,200,150,6*i*Math.PI/180,6*(i+1)*Math.PI/180,false);
+                        oG.stroke();
+                    }
+                    oG.closePath();
+
+                    oG.fillStyle = '#fff';
+                    oG.beginPath();
+                    oG.arc(200,200,145,0,360*Math.PI/180,true);
+                    oG.fill();
+                    oG.closePath();
+
+                    /*画个钟表*/  
+                    oG.lineWidth = 3;  
+                    oG.beginPath();  
+                        
+                    for(var i=0;i<12;i++){
+                        oG.moveTo(200,200);
+                        oG.arc(200,200,150,30*i*Math.PI/180,30*i*Math.PI/180,false);
+                        oG.stroke();
+                    }
+                    oG.closePath();
+
+                    oG.fillStyle = '#fff';
+                    oG.beginPath();
+                    oG.arc(200,200,140,0,360*Math.PI/180,true);
+                    oG.fill();
+                    oG.closePath();
+
+
+                    var oDate = new Date();
+                    var oHour = oDate.getHours(); //获取系统时，
+                    var oMin = oDate.getMinutes(); //分
+                    var oSecond = oDate.getSeconds(); //秒
+
+                    // 时针
+                    //注意canvas上面的 是从时钟上3的位置开始计算角度  而时钟上市从12的位置开始计算角度
+                    oG.beginPath();
+                    oG.lineWidth = 5;
+                    oG.moveTo(200,200);
+                    oG.arc(200,200,70,(oHour*30+oMin*6/12-90)*Math.PI/180,(oHour*30+oMin*6/12-90)*Math.PI/180,false);
+                    oG.stroke();
+                    oG.closePath();
+
+                    oG.beginPath();
+                    oG.lineWidth = 3;
+                    oG.moveTo(200,200);
+                    oG.arc(200,200,100,(oMin*6-90)*Math.PI/180,(oMin*6-90)*Math.PI/180,false);
+                    oG.stroke();
+                    oG.closePath();
+
+                    oG.beginPath();
+                    oG.lineWidth = 1;
+                    oG.moveTo(200,200);
+                    oG.arc(200,200,130,(oSecond*6-90)*Math.PI/180,(oSecond*6-90)*Math.PI/180,false);
+                    oG.stroke();
+                    oG.closePath();
+                }
+
+                drowTime();
+
+
+                setInterval(function(){
+                    oG.clearRect(0,0,c1.width,c1.height);
+                    drowTime();
+                },1000)
+                
+
+                
+                
+
+                
+            }
+        </script>
+    </head>
+    <body>
+        <canvas id="c1" width="400" height="400"></canvas> <!-- 默认宽高 w:300 h:150 -->
+    </body>
+</html>

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="css/wk-data.css">
+    <style>
+        .date-input{
+            width: 200px;
+            height: 20px;
+            border:1px solid #999999;
+        }
+    </style>
+</head>
+<body>
+    <input type="text" class="date-input" id="demo" readonly="readonly" data-date="YYYY/MM/DD"/>
+</body>
+<script src="js/wk-date.js"></script>
+<script>
+    wkDate.config({ width: '250px'}).listen('.date-input');
+</script>
+</html>

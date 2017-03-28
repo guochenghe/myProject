@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width,maximum-scale=1.0,user-scalable=no">
+        <style type="text/css">
+            body{
+                background: #000;
+            }
+            #c1{
+                background: #fff;
+            }
+        </style>
+
+        <<script>
+            window.onload = function(){
+
+                var c1 = document.getElementById('c1'); //画布
+
+                oG = c1.getContext('2d');   //绘图环境
+
+                oG.save();  //保存路径
+
+                oG.fillStyle='red';
+                oG.strokeStyle='yellow';
+                oG.beginPath();
+                oG.moveTo(50,50);
+                oG.lineTo(50,100);
+                oG.lineTo(20,100);
+                oG.closePath();
+                oG.fill();
+
+                oG.restore();  //回复路径
+
+                oG.beginPath();
+                oG.moveTo(50,150);
+                oG.lineTo(50,200);
+                oG.lineTo(20,200);
+                oG.closePath();
+                oG.fill();
+                //oG.clearRect(0,0,c1.width,c1.height);  //这里如果取画布的大小的话，只能通过c1 来获取,绝对不能通过oG来获取
+                
+
+            }
+        </script>
+    </head>
+    <body>
+        <canvas id="c1" width="400" height="400"></canvas> <!-- 默认宽高 w:300 h:150 -->
+    </body>
+</html>

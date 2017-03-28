@@ -1,0 +1,36 @@
+底部导航点击延迟加载问题
+
+客服弹框无法正常关闭问题
+解决：在同一个页面加载ifram解决
+
+angular 和js下拉刷新问题
+解决：用angular  scope对象
+
+
+overflow-y:auto;
+-webkit-overflow-scrolling : touch;
+overflow-scrolling : touch;
+解决overflow auto苹果浏览器下面滑动不流畅
+
+
+日期格式在苹果的兼容
+解决：统一日期格式 2016/12/01  用"/"连接数字
+
+带边框的元素中的文字上下居中在苹果和Android兼容问题
+css 动画属性不要加载伪元素身上
+
+静态方法和实例方法
+
+
+
+0 180
+0 240
+0 300
+
+0 360
+0 410
+0 470
+
+200
+230
+270

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Document</title>
+<style>
+body{
+background: #cccccc;
+}
+#c1{
+background: white;
+}
+</style>
+<script>
+window.onload = function(){
+    var oC = document.getElementById('c1');
+    var oGC = oC.getContext('2d');
+    var num = 0;
+        
+    setInterval(function(){
+             
+            num++;
+            
+            oGC.save();//保存路径
+            oGC.clearRect(0,0,oC.width,oC.height);
+            oGC.translate(100,100);
+            oGC.rotate(num*Math.PI/180);
+            oGC.fillRect(0,0,100,100);
+            oGC.restore();//回复路径
+    },30);
+};
+</script>
+</head>
+<body>
+<canvas id="c1" width="600" height="600">
+ 
+</canvas>
+</body>
+</html>

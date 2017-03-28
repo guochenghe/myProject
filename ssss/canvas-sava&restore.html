@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <style type="text/css">
+            body{
+                background: #ccc;
+            }
+            #c1{
+                background: #fff;
+            }
+        </style>
+
+        <script>
+            window.onload = function(){
+
+                var c1 = document.getElementById('c1'); //画布
+
+                oG = c1.getContext('2d');   //绘图环境
+
+                var num = 0;
+                var num2 = 0;
+                setInterval(function(){
+                    num++;
+                    num2++;
+                    oG.save();
+                    oG.clearRect(0,0,c1.width,c1.height);
+                    oG.translate(100,100);  //canvas 动画最好作为一个整体放在一起 我也不知道为什么
+                    oG.rotate(num*Math.PI/180);
+                    /*if(num2>=100){
+                        num2=0;
+                    }
+                    
+                    oG.scale(num2*1/50,num2*1/50);*/
+                    oG.translate(-50,-50);
+                    oG.fillRect(0,0,50,50);
+                    oG.restore();
+                }, 30);
+
+            }
+        </script>
+    </head>
+    <body>
+        <canvas id="c1" width="400" height="400"></canvas> <!-- 默认宽高 w:300 h:150 -->
+    </body>
+</html>

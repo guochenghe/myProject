@@ -1,0 +1,72 @@
+body {
+  -moz-user-select: none;
+  /*火狐*/
+  -webkit-user-select: none;
+  /*webkit浏览器*/
+  -ms-user-select: none;
+  /*IE10*/
+  -khtml-user-select: none;
+  /*早期浏览器*/
+  user-select: none;
+}
+.dl-warp {
+  box-shadow: 0 3px 10px 2px rgba(0, 0, 0, 0.2);
+  -webkit-box-shadow: 0 3px 10px 2px rgba(0, 0, 0, 0.2);
+  border: 1px solid #999999;
+  padding: 10px;
+}
+.dl-choose {
+  width: 100%;
+  height: 20px;
+}
+.dl-choose > div {
+  width: 50%;
+  float: left;
+  height: 20px;
+  text-align: center;
+}
+.dl-choose > div span {
+  cursor: pointer;
+  background: #f2f2f2;
+}
+.dl-choose > div span:nth-child(2) {
+  cursor: default;
+  background: #ffffff;
+}
+.dl-table {
+  width: 100%;
+  border: 1px solid #000000;
+  text-align: center;
+}
+.dl-table thead {
+  background: #CCCCCC;
+}
+.dl-table thead tr th {
+  border: none;
+}
+.dl-table tbody tr td span {
+  display: inline-block;
+  width: 100%;
+  height: 100%;
+  -webkit-transition: all 0.3s;
+  -moz-transition: all 0.3s;
+  -ms-transition: all 0.3s;
+  -o-transition: all 0.3s;
+  transition: all 0.3s;
+}
+.dl-table tbody tr td span:hover {
+  background: #3f4e68;
+  color: #ffffff;
+  cursor: pointer;
+}
+.date-btn {
+  margin-top: 10px;
+}
+.date-btn a {
+  padding: 2px 5px;
+  background: #00A000;
+  color: #ffffff;
+  border-radius: 2px;
+  cursor: pointer;
+  margin-right: 10px;
+}

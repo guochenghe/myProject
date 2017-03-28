@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width,maximum-scale=1.0,user-scalable=no">
+        <style type="text/css">
+            body{
+                background: #000;
+            }
+            #c1{
+                background: #fff;
+            }
+        </style>
+
+        <<script>
+            window.onload = function(){
+
+                var c1 = document.getElementById('c1');
+
+                oG = c1.getContext('2d');
+
+                oG.fillStyle = '#f40';
+                oG.strokeStyle = 'blue';
+                oG.lineWidth = 5;   /*边框线是向两边延伸*/
+
+                oG.lineJoin = 'bevel';
+                oG.fillRect(50,50,40,40);  //x轴距离坐标原点的距离，y距离坐标原点的距离，宽度，高度
+                oG.strokeRect(50.5,50.5,40,40);
+                
+
+            }
+        </script>
+    </head>
+    <body>
+        <canvas id="c1" width="400" height="400"></canvas> <!-- 默认宽高 w:300 h:150 -->
+    </body>
+</html>

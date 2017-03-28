@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width,maximum-scale=1.0,user-scalable=no">
+        <style type="text/css">
+            body{
+                background: #000;
+            }
+            #c1{
+                background: #fff;
+            }
+        </style>
+
+        <script>
+            window.onload = function(){
+                
+                var c1 = document.getElementById('c1'); //画布
+
+                oG = c1.getContext('2d');   //绘图环境
+                
+
+                //绘制image时候必须等到图片加载完成之后才能执行canvas的操作
+
+                var oImg = new Image();
+                oImg.src = '52.jpg';
+
+                oImg.onload = function(){
+                    //参数设置 （图片对象，距离x轴坐标原点的距离，距离y轴坐标原点的距离，宽度，高度）后面两个参数可以省略,即为图片自身大小
+                    
+                    var btn = document.getElementById('btn');
+                    var num = 0;
+                    var imgW = oImg.width;
+                    var imgH = oImg.height;
+                    c1.width = imgW;
+                    c1.height = imgH;
+                    oG.drawImage(oImg,0,0);
+                    btn.onclick = function(){
+
+                        num ++;
+                        switch(num){
+                            case 1:
+                                c1.width = imgH;
+                                c1.height = imgW;
+                                oG.clearRect(0,0,c1.width,c1.height)
+                                oG.rotate(90*Math.PI/180);  //旋转只是画布里面的内容旋转，画布不动
+                                oG.drawImage(oImg,0,-imgH);  //比较深建议ps画图分析
+                                break;
+                            case 2:
+                                c1.width = imgW;
+                                c1.height = imgH;
+                                oG.clearRect(0,0,c1.width,c1.height)
+                                oG.rotate(180*Math.PI/180);  //旋转只是画布里面的内容旋转，画布不动
+                                oG.drawImage(oImg,-imgW,-imgH);  //比较深建议ps画图分析
+                                break;
+                            case 3:
+                                c1.width = imgH;
+                                c1.height = imgW;
+                                oG.clearRect(0,0,c1.width,c1.height)
+                                oG.rotate(270*Math.PI/180);  //旋转只是画布里面的内容旋转，画布不动
+                                oG.drawImage(oImg,-imgW,0);  //比较深建议ps画图分析
+                                break;
+                            case 4:
+                                c1.width = imgW;
+                                c1.height = imgH;
+                                oG.clearRect(0,0,c1.width,c1.height)
+                                oG.rotate(360*Math.PI/180);  //旋转只是画布里面的内容旋转，画布不动
+                                oG.drawImage(oImg,0,0);  //比较深建议ps画图分析
+                                num = 0;
+                                break;
+                        }
+                    }
+                }
+  
+            }
+        </script>
+    </head>
+    <body>
+        <button id="btn">旋转图片</button>
+        <canvas id="c1" width="400" height="400"></canvas> <!-- 默认宽高 w:300 h:150 -->
+    </body>
+</html>

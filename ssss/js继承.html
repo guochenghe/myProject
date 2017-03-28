@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title></title>
+	<script>
+		function Father (){
+			this.name = 'guocheng';
+		}
+		Father.prototype.showName = function(){
+			alert(this.name)
+		}
+
+
+		function Son (){
+			//this.name = 'he';
+			Father.call(this);   //属性继承
+		}
+
+		//方法继承  四句话
+		var f = function(){};
+		f.prototype = Father.prototype; 
+		Son.prototype = new f();
+		Son.prototype.constructor = Son;
+
+
+		var p = new Son();
+		p.showName();
+	</script>
+</head>
+<body>
+	
+
+</body>
+</html>

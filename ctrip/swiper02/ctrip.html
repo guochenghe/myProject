@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
+	<title>swiper</title>
+	<style type="text/css">
+	*{margin:0;padding:0;border:0;}
+		.swiper01{
+			width: 100%;
+			background: #999;
+		}
+		.swiper02{
+			width: 100%;
+			background: #f40;
+			overflow-y: scroll;
+		}
+		.swiper02 .con{
+			width: 80%;
+			margin: 0 auto;
+			height: 2000px;
+			padding-top: 100px;
+			background: #ddd;
+		}
+	</style>
+</head>
+<body>
+	<div class="swiper01">
+		<div class="con"></div>
+	</div>
+	<div class="swiper02">
+		<div class="con">
+			
+
+			sh水果公司的那些small and cute的设备给我们提供了前所未有的用户体验。当用户在iphone和ipad上运指如飞
+的时候，那些使用objective-c写出优秀应用的开发人员们心里一定充满了成就感，因为正是他们（而不是水果
+）让iOS的世界变的丰富多彩。然而对于我们这些以web为自己事业核心的程序员来说，这种让人欲罢不能的多
+触式体验似乎跟我们关系不大，因为浏览器那一小块地方就是我们和用户的全部交集了。而许多网站为了让iOS
+的用户能够在多触式体验下使用自己的服务，都专门花钱开发objective-c的本地程序作为自己web service的客
+户端。 
+    其实，对于一个web程序员或者一个网站来说，如果你的需求仅仅是让iPhone/iPad用户能够正常使用你的
+服务，那现有的html4页面完全能够满足（也许需要一点点重构，但是很容易）；如果再往上一点，你需要让你
+的web客户端看起来像是用objective-c实现的一样，也并非不可能，只需要将我们熟悉的javascript搬到iOS设
+备上来就行。 
+    本文从一个多触式网页开发初学者的角度，首先简单介绍一下iOS上的浏览器（这里主要指Safari）所支持的
+多触式事件模型，然后将触控（Touch）这种简单的动作升级为手势（Gestrue），最后将javascript + html + 
+css构建的应用脱离浏览器，放到iOS设备的屏幕上成为一个本地link并和植物大战僵尸放到一起。 
+    iOS上的Safari也支持click 和mouseover等传统的交互事件，只是不推荐在iOS的浏览器应用上使用click和
+mouseover，因为这两个事件是为了支持鼠标点击而设计出来的。Click事件在iOS上会有半秒左右的延迟，原
+因是iOS要highlight接收到click的element。而mouseover/out等事件则会被手指的点击触发。所以，在iOS上
+，应当抛弃传统的交互事件模型而接受一个新的事件模型。Touch事件和更高级的Gesture事件，能让你的网页
+交互起来像native应用一样。 
+    处理Touch事件能让你跟踪用户的每一根手指的位置。你可以绑定以下四种Touch事件：
+
+touchstart:  // 手指放到屏幕上的时候触发 
+touchmove:  // 手指在屏幕上移动的时候触发 
+touchend:  // 手指从屏幕上拿起的时候触发 
+touchcancel:  // 系统取消touch事件的时候触发。至于系统什么时候会取消，不详。。
+Gesture事件则是对touch事件的更高级的封装，主要处理手指slide、rotate、scale等动作，将在下一篇文章
+详述。 
+    在开始描述touch事件之前，需要先描述一下多触式系统中特有的touch对象（android和iOS乃至nokia最新
+的meego系统都模拟了类似的对象，这里只针对iOS，因为我只有iPad可用于测试。。）。这个对象封装一次
+屏幕触摸，一般来自于手指。它在touch事件触发的时候产生，可以通过touch event handler的event对象取到
+（一般是通过event.changedTouches属性）。这个对象包括一些重要的属性： 
+
+client / clientY：// 触摸点相对于浏览器窗口viewport的位置 
+pageX / pageY：// 触摸点相对于页面的位置 
+screenX /screenY：// 触摸点相对于屏幕的位置 
+identifier： // touch对象的unique ID 
+CSS代码
+
+.spirit {              /* 方块的class名称*/
+         position: absolute;
+         width: 50px;
+         height: 50px;
+         background-color: red;
+}
+然后，在body下定义一个接收事件的容器，这里body的height必须是100%才能占满整个viewport： 
+
+Html
+
+
+		</div>
+	</div>
+
+
+	<script type="text/javascript" src="jquery-1.11.1.js"></script>
+
+	<script type="text/javascript">
+		$(document).ready(function() {
+			
+			$('.swiper01').height($(window).height());
+			$('.swiper02').height($(window).height());
+
+			document.getElementsByClassName('swiper01')[0].addEventListener("touchmove",function(e){
+				e.preventDefault();
+				e.stopPropagation();
+			},false);
+			var jinzhi = 1;
+			document.getElementsByClassName('swiper02')[0].addEventListener("touchmove",function(e){
+				if(jinzhi == 1){
+					e.preventDefault();
+					e.stopPropagation();
+				}
+			
+			},false);
+
+
+			var touchstartY,  
+				touchendY,
+				touchDistance;
+			$('.swiper01').bind('touchstart', function (event) {
+				
+				event.stopPropagation();
+			    touchstartY = event.originalEvent.changedTouches[0].clientY; 
+			});
+
+
+
+
+			$('.swiper01').bind('touchend', function (event) {
+				
+				event.stopPropagation();
+				
+
+			    touchendY = event.originalEvent.changedTouches[0].clientY;
+			    touchDistance = touchstartY - touchendY;
+
+			    if(touchDistance>50 && touchDistance<$(window).height()){
+
+
+			    	$('body,html').stop().animate({scrollTop:$(window).height()+'px'}, 500);
+
+			    }else{
+			    	$('body,html').stop().animate({scrollTop:0}, 200);
+			    }
+			});
+
+
+			$('.swiper02 .con').bind('touchmove', function (event) {
+
+				event.stopPropagation();
+
+			});
+
+			$('.swiper02 .con').bind('touchend', function (event) {
+
+				event.stopPropagation();
+				event.preventDefault();
+
+				console.log($(window).scrollTop(),$(window).height()/2)
+				if($(window).scrollTop() >= ($(window).height())){
+	
+				}else{
+					$('body,html').stop().animate({scrollTop:0}, 200);
+				}
+			});
+
+			$('.swiper02').scroll(function(){
+				console.log(1);
+			})
+
+		});
+	</script>
+</body>
+</html>
